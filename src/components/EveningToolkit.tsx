@@ -414,53 +414,93 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
     </div>
   );
 
+  const getSmartSuggestions = () => {
+    const haltFindings = checkInData.feelings.filter(f => f.startsWith('halt-'));
+    const emotionalFindings = checkInData.feelings.filter(f => !f.startsWith('halt-'));
+    
+    let suggestions = {
+      primary: 'explore',
+      reasoning: 'Let\'s find what you truly need right now.',
+      activityHint: 'nurturing activities',
+      pauseHint: 'gentle reflection'
+    };
+
+    if (haltFindings.includes('halt-lonely')) {
+      suggestions = {
+        primary: 'explore',
+        reasoning: 'It sounds like you might need connection right now.',
+        activityHint: 'connection-focused activities',
+        pauseHint: 'self-compassion practice'
+      };
+    } else if (haltFindings.includes('halt-tired')) {
+      suggestions = {
+        primary: 'pause',
+        reasoning: 'Your body and mind might need rest more than food.',
+        activityHint: 'gentle, restorative activities',
+        pauseHint: 'rest and relaxation'
+      };
+    } else if (haltFindings.includes('halt-angry') || emotionalFindings.some(f => ['stressed', 'frustrated', 'overwhelmed'].includes(f))) {
+      suggestions = {
+        primary: 'explore',
+        reasoning: 'These intense feelings deserve attention and care.',
+        activityHint: 'stress-releasing activities',
+        pauseHint: 'calming practices'
+      };
+    } else if (emotionalFindings.some(f => ['bored', 'restless'].includes(f))) {
+      suggestions = {
+        primary: 'explore',
+        reasoning: 'Sounds like you need some engaging stimulation.',
+        activityHint: 'engaging, creative activities',
+        pauseHint: 'mindful presence'
+      };
+    }
+
+    return suggestions;
+  };
+
   const renderRouting = () => {
-    const isPhysicallyHungry = checkInData.hungerFullnessLevel <= 3 && checkInData.feelings.includes('physically-hungry');
-    const isEmotional = checkInData.feelings.some(f => ['stressed', 'bored', 'tired', 'anxious', 'lonely', 'sad', 'frustrated', 'irritated'].includes(f)) || checkInData.customFeeling;
+    const isPhysicallyHungry = checkInData.hungerFullnessLevel <= 3 && checkInData.feelings.includes('halt-hungry');
+    const suggestions = getSmartSuggestions();
 
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">What feels right for you right now?</h3>
-          <p className="text-sm text-gray-600">Based on your check-in, here's a gentle path—honor what feels right.</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">What would truly nurture you right now?</h3>
+          <p className="text-sm text-gray-600">{suggestions.reasoning}</p>
+        </div>
+
+        {/* Smart suggestion banner */}
+        <div className="p-3 bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200 rounded-lg">
+          <p className="text-sm text-purple-800 text-center">
+            💡 <strong>Gentle guidance:</strong> Based on your feelings, consider exploring alternatives first - they often meet the need more directly than food.
+          </p>
         </div>
 
         <div className="space-y-4">
-          {isPhysicallyHungry && (
-            <button
-              onClick={() => {
-                setCheckInData(prev => ({ ...prev, routeChosen: 'eat' }));
-                setCurrentStep('mindful-eating');
-              }}
-              className="w-full p-4 rounded-lg border-2 border-green-500 bg-green-50 hover:bg-green-100 transition-all text-left"
-            >
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">🍽️</span>
-                <div>
-                  <h4 className="font-semibold text-green-800">Honor your hunger</h4>
-                  <p className="text-sm text-green-700 mt-1">
-                    Your body is asking for nourishment. Let's explore some mindful eating together.
-                  </p>
-                </div>
-              </div>
-            </button>
-          )}
-
-          {/* Always show explore option, not just for emotional states */}
+          {/* Always show non-food alternatives first - more prominent */}
           <button
             onClick={() => {
               setCheckInData(prev => ({ ...prev, routeChosen: 'activity' }));
               setCurrentStep('activity-selection');
             }}
-            className="w-full p-4 rounded-lg border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-all text-left"
+            className={`w-full p-5 rounded-xl border-2 transition-all text-left transform hover:scale-[1.02] ${
+              suggestions.primary === 'explore' 
+                ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-purple-100 shadow-lg' 
+                : 'border-purple-400 bg-purple-50 hover:bg-purple-100'
+            }`}
           >
-            <div className="flex items-start space-x-3">
-              <span className="text-2xl">🌸</span>
+            <div className="flex items-start space-x-4">
+              <div className="text-3xl">🌸</div>
               <div>
-                <h4 className="font-semibold text-purple-800">Explore what you need</h4>
+                <h4 className="font-bold text-purple-800 text-lg">Explore what you need</h4>
                 <p className="text-sm text-purple-700 mt-1">
-                  Let's discover gentle ways to nurture what you're really feeling right now.
+                  Discover {suggestions.activityHint} that address your feelings directly.
                 </p>
+                {suggestions.primary === 'explore' && (
+                  <div className="mt-2 px-2 py-1 bg-purple-200 text-purple-800 text-xs rounded-full inline-block">
+                    💙 Recommended for you
+                  </div>
+                )}
               </div>
             </div>
           </button>
@@ -470,20 +510,52 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
               setCheckInData(prev => ({ ...prev, routeChosen: 'pause' }));
               setCurrentStep('pause-options');
             }}
-            className="w-full p-4 rounded-lg border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all text-left"
+            className={`w-full p-5 rounded-xl border-2 transition-all text-left transform hover:scale-[1.02] ${
+              suggestions.primary === 'pause'
+                ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100 shadow-lg'
+                : 'border-blue-400 bg-blue-50 hover:bg-blue-100'
+            }`}
           >
-            <div className="flex items-start space-x-3">
-              <span className="text-2xl">🧘‍♀️</span>
+            <div className="flex items-start space-x-4">
+              <div className="text-3xl">🧘‍♀️</div>
               <div>
-                <h4 className="font-semibold text-blue-800">Just pause and reflect</h4>
+                <h4 className="font-bold text-blue-800 text-lg">Pause and be present</h4>
                 <p className="text-sm text-blue-700 mt-1">
-                  Sometimes awareness is enough. Choose a gentle way to sit with whatever you're experiencing.
+                  Sometimes awareness itself is healing. Try {suggestions.pauseHint}.
                 </p>
+                {suggestions.primary === 'pause' && (
+                  <div className="mt-2 px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded-full inline-block">
+                    💙 Recommended for you
+                  </div>
+                )}
               </div>
             </div>
           </button>
 
-          {!isPhysicallyHungry && (
+          {/* Eating options - smaller and less prominent */}
+          <div className="pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500 text-center mb-3">If you feel drawn to eating:</p>
+            
+            {isPhysicallyHungry && (
+              <button
+                onClick={() => {
+                  setCheckInData(prev => ({ ...prev, routeChosen: 'eat' }));
+                  setCurrentStep('mindful-eating');
+                }}
+                className="w-full p-4 rounded-lg border-2 border-green-400 bg-green-50 hover:bg-green-100 transition-all text-left mb-2"
+              >
+                <div className="flex items-start space-x-3">
+                  <span className="text-xl">🍽️</span>
+                  <div>
+                    <h4 className="font-semibold text-green-800">Honor your hunger</h4>
+                    <p className="text-sm text-green-700 mt-1">
+                      Your body is asking for nourishment. Let's eat mindfully together.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 setCheckInData(prev => ({ ...prev, routeChosen: 'eat' }));
@@ -492,16 +564,16 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
               className="w-full p-4 rounded-lg border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 transition-all text-left"
             >
               <div className="flex items-start space-x-3">
-                <span className="text-2xl">🤝</span>
+                <span className="text-xl">🤝</span>
                 <div>
-                  <h4 className="font-semibold text-gray-700">I want to eat anyway</h4>
+                  <h4 className="font-semibold text-gray-700">I want to eat mindfully</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    That's okay too. Let's explore some gentle questions to make it a mindful experience.
+                    That's okay too. Let's explore some gentle questions to make it nourishing.
                   </p>
                 </div>
               </div>
             </button>
-          )}
+          </div>
         </div>
       </div>
     );
