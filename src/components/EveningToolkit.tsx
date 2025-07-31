@@ -843,32 +843,100 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
     </div>
   );
 
+  const getPersonalizedJournalingPrompts = () => {
+    const haltFindings = checkInData.feelings.filter(f => f.startsWith('halt-'));
+    const emotionalFindings = checkInData.feelings.filter(f => !f.startsWith('halt-'));
+    
+    let prompts = [
+      "What am I feeling right now, and what might that be telling me?",
+      "What do I need most in this moment - beyond food?",
+      "What would I tell a dear friend feeling this way?"
+    ];
+    
+    // Add HALT-specific prompts
+    if (haltFindings.includes('halt-lonely')) {
+      prompts.unshift("What kind of connection do I crave right now? How else might I feel less alone?");
+    }
+    if (haltFindings.includes('halt-angry')) {
+      prompts.unshift("What's really making me angry or frustrated? What would help me process this?");
+    }
+    if (haltFindings.includes('halt-tired')) {
+      prompts.unshift("How is my body asking for rest? What would truly restore my energy?");
+    }
+    if (haltFindings.includes('halt-hungry')) {
+      prompts.unshift("Is this physical hunger or something else? What would truly satisfy me?");
+    }
+    
+    // Add emotion-specific prompts
+    if (emotionalFindings.includes('stressed') || emotionalFindings.includes('overwhelmed')) {
+      prompts.push("What's creating stress in my life right now? What small step could bring relief?");
+    }
+    if (emotionalFindings.includes('bored') || emotionalFindings.includes('restless')) {
+      prompts.push("What kind of stimulation or engagement am I seeking? What would spark joy?");
+    }
+    if (emotionalFindings.includes('sad')) {
+      prompts.push("What's underneath this sadness? How can I be gentle with myself right now?");
+    }
+    
+    // Always include these IE/ME integration prompts
+    prompts.push("How did my eating patterns today affect how I'm feeling now?");
+    prompts.push("What does my body actually need to feel nourished and cared for?");
+    
+    return prompts.slice(0, 6); // Limit to 6 prompts so it's not overwhelming
+  };
+
   const renderJournaling = () => {
+    const personalizedPrompts = getPersonalizedJournalingPrompts();
     
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">📝 Journal Space</h3>
-          <p className="text-sm text-gray-600">Write whatever comes to mind. This is your safe space.</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">📝 Reflection Space</h3>
+          <p className="text-sm text-gray-600">A safe space to explore your feelings and needs with curiosity.</p>
         </div>
         
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Gentle prompts (if helpful):</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• What am I feeling right now?</li>
-            <li>• What has my day been like?</li>
-            <li>• What do I need most right now?</li>
-            <li>• What am I grateful for today?</li>
-            <li>• What would I tell a friend feeling this way?</li>
+        {/* Personalized prompts based on HALT and emotions */}
+        <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+          <h4 className="font-medium text-purple-900 mb-2">💭 Personalized prompts based on your check-in:</h4>
+          <ul className="text-sm text-purple-800 space-y-2">
+            {personalizedPrompts.map((prompt, index) => (
+              <li key={index} className="flex items-start space-x-2">
+                <span className="text-purple-600 mt-0.5">•</span>
+                <span>{prompt}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Unmet needs exploration */}
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <h4 className="font-medium text-amber-900 mb-2">🌱 Unmet needs exploration:</h4>
+          <p className="text-sm text-amber-800 mb-2">
+            Sometimes evening eating meets emotional needs. Consider:
+          </p>
+          <ul className="text-sm text-amber-700 space-y-1">
+            <li>• What need was I trying to meet by reaching for food?</li>
+            <li>• How else could I meet that need tomorrow?</li>
+            <li>• What patterns do I notice about my evening emotions?</li>
+            <li>• How can I honor my feelings without food as the solution?</li>
           </ul>
         </div>
 
         <textarea
           value={journalEntry}
           onChange={(e) => setJournalEntry(e.target.value)}
-          placeholder="Dear journal..."
-          className="w-full p-4 border border-gray-300 rounded-lg min-h-[200px] resize-none"
+          placeholder="Dear self... Let your thoughts flow freely here. There's no right or wrong way to reflect."
+          className="w-full p-4 border border-gray-300 rounded-lg min-h-[200px] resize-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400"
         />
+
+        {/* Day patterns integration */}
+        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+          <h4 className="font-medium text-green-900 mb-1 text-sm">🔄 Tomorrow's gentle intention:</h4>
+          <p className="text-xs text-green-700">
+            Based on tonight's insights, what one small change could support you tomorrow? 
+            (e.g., eating lunch earlier, taking a walk, texting a friend)
+          </p>
+        </div>
 
         <div className="space-y-3">
           <button
@@ -876,7 +944,7 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
               setCheckInData(prev => ({ ...prev, reflectionNotes: journalEntry }));
               setCurrentStep('timer');
             }}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-medium"
+            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-medium"
           >
             Continue to Reflection
           </button>
