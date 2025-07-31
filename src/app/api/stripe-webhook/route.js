@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { updateSubscription, findUserByCustomerId } from '../../../../lib/userService';
-import { errorLogger } from '../../../../lib/monitoring';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(req) {
   try {
+    // Dynamically import dependencies to avoid build-time initialization
+    const Stripe = (await import('stripe')).default;
+    const { updateSubscription, findUserByCustomerId } = await import('../../../../lib/userService');
+    const { errorLogger } = await import('../../../../lib/monitoring');
+    
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+      apiVersion: '2023-10-16',
+    });
+
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
