@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import EveningToolkitInsights from './EveningToolkitInsights';
+import PremiumInsights from './PremiumInsights';
+import PremiumBadge from './PremiumBadge';
+import { useAuth } from '../../contexts/AuthContext';
+import { saveCheckIn, startSession } from '../../lib/userService';
+import { getPersonalizedActivitySuggestions } from '../../lib/grokApi';
 
 interface EveningToolkitProps {
   onComplete?: () => void;
@@ -241,7 +246,11 @@ const ACTIVITY_SUGGESTIONS: Record<string, ActivitySuggestion[]> = {
 };
 
 export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitProps) {
+  const { user, isAuthenticated, isPremium } = useAuth();
   const [currentStep, setCurrentStep] = useState<CheckInStep>('welcome');
+  const [showPremiumInsights, setShowPremiumInsights] = useState(false);
+  const [aiActivitySuggestions, setAiActivitySuggestions] = useState<any[]>([]);
+  const [loadingAiSuggestions, setLoadingAiSuggestions] = useState(false);
   const [checkInData, setCheckInData] = useState<CheckInData>({
     lastMealTiming: '',
     feelings: [],
@@ -634,9 +643,31 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
     </div>
   );
 
+  // Fetch AI suggestions when user reaches activity selection
+  useEffect(() => {
+    if (currentStep === 'activity-selection' && isPremium && isAuthenticated && checkInData.feelings.length > 0) {
+      const fetchAiSuggestions = async () => {
+        setLoadingAiSuggestions(true);
+        try {
+          const suggestions = await getPersonalizedActivitySuggestions(checkInData);
+          if (suggestions) {
+            setAiActivitySuggestions(suggestions);
+          }
+        } catch (error) {
+          console.error('Error fetching AI suggestions:', error);
+        } finally {
+          setLoadingAiSuggestions(false);
+        }
+      };
+      
+      fetchAiSuggestions();
+    }
+  }, [currentStep, isPremium, isAuthenticated, checkInData.feelings, checkInData.emotionalIntensity, checkInData.hungerFullnessLevel]);
+
   const renderActivitySelection = () => {
     // Get emotion-specific suggestions
     const emotionalSuggestions = getActivitySuggestions();
+    const showAllActivities = isPremium;
     
     const commonActivities = [
       {
@@ -690,6 +721,63 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
           <p className="text-sm text-gray-600">Choose an activity that feels right, or create your own.</p>
         </div>
         
+        {/* AI-Powered Suggestions for Premium Users */}
+        {isPremium && isAuthenticated && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-purple-700">
+                ✨ AI-Powered Suggestions for You:
+              </h4>
+              <span className="px-2 py-1 text-xs bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 rounded-full">
+                Premium
+              </span>
+            </div>
+            
+            {loadingAiSuggestions ? (
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-pulse text-purple-600">🤖</div>
+                  <span className="text-sm text-purple-700">AI is analyzing your emotional state...</span>
+                </div>
+              </div>
+            ) : aiActivitySuggestions.length > 0 ? (
+              <div className="space-y-2">
+                {aiActivitySuggestions.slice(0, 3).map((activity, index) => (
+                  <button
+                    key={`ai-${index}`}
+                    onClick={() => {
+                      setCheckInData(prev => ({ 
+                        ...prev, 
+                        selectedActivity: {
+                          category: 'AI Suggested',
+                          title: activity.title,
+                          description: activity.description,
+                          duration: activity.duration,
+                          icon: '🤖'
+                        }
+                      }));
+                      setCurrentStep('timer');
+                    }}
+                    className="w-full p-3 rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 transition-all text-left"
+                  >
+                    <div className="flex items-start space-x-2">
+                      <span className="text-lg">🤖</span>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-purple-900 text-sm">{activity.title}</h5>
+                        <p className="text-xs text-purple-700 mt-1">{activity.description}</p>
+                        <p className="text-xs text-purple-600 mt-1 italic">Why: {activity.why}</p>
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-purple-200 text-purple-800 text-xs rounded">
+                          {activity.duration} • AI Suggested
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
+
         {/* Emotion-specific suggestions */}
         {emotionalSuggestions.length > 0 && (
           <div className="mb-6">
@@ -722,12 +810,15 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
           </div>
         )}
         
-        <h4 className="text-sm font-medium text-gray-700 mb-3">
-          🌸 Or choose a general nurturing activity:
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-gray-700">
+            🌸 Or choose a general nurturing activity:
+          </h4>
+          {!isPremium && <PremiumBadge feature="All Activities" />}
+        </div>
         
         <div className="space-y-3">
-          {commonActivities.map((activity, index) => (
+          {commonActivities.slice(0, showAllActivities ? commonActivities.length : 3).map((activity, index) => (
             <button
               key={index}
               onClick={() => {
@@ -748,6 +839,27 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
               </div>
             </button>
           ))}
+          
+          {/* Premium upgrade prompt for more activities */}
+          {!isPremium && commonActivities.length > 3 && (
+            <div className="p-4 rounded-lg border-2 border-dashed border-purple-300 bg-gradient-to-r from-purple-50 to-indigo-50">
+              <div className="text-center">
+                <span className="text-2xl mb-2 block">✨</span>
+                <h4 className="font-semibold text-purple-900 mb-1">
+                  {commonActivities.length - 3} More Activities Available
+                </h4>
+                <p className="text-sm text-purple-700 mb-3">
+                  Unlock all personalized activities plus AI-powered suggestions with Premium
+                </p>
+                <button
+                  onClick={() => window.location.href = '/?upgrade=true'}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg text-sm hover:from-purple-700 hover:to-indigo-700"
+                >
+                  Upgrade to Premium
+                </button>
+              </div>
+            </div>
+          )}
           
           {/* Custom activity option */}
           <div className="p-4 rounded-lg border-2 border-dashed border-gray-300">
@@ -897,16 +1009,62 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
         
         {/* Personalized prompts based on HALT and emotions */}
         <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
-          <h4 className="font-medium text-purple-900 mb-2">💭 Personalized prompts based on your check-in:</h4>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-medium text-purple-900">💭 Personalized prompts based on your check-in:</h4>
+            {!isPremium && <PremiumBadge feature="Advanced Prompts" />}
+          </div>
           <ul className="text-sm text-purple-800 space-y-2">
-            {personalizedPrompts.map((prompt, index) => (
+            {personalizedPrompts.slice(0, isPremium ? personalizedPrompts.length : 2).map((prompt, index) => (
               <li key={index} className="flex items-start space-x-2">
                 <span className="text-purple-600 mt-0.5">•</span>
                 <span>{prompt}</span>
               </li>
             ))}
+            {!isPremium && personalizedPrompts.length > 2 && (
+              <li className="flex items-start space-x-2 opacity-50">
+                <span className="text-purple-600 mt-0.5">•</span>
+                <span className="italic">Unlock {personalizedPrompts.length - 2} more personalized prompts with Premium</span>
+              </li>
+            )}
           </ul>
         </div>
+
+        {/* Premium-only Pattern Recognition Prompts */}
+        {isPremium ? (
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+            <h4 className="font-medium text-amber-900 mb-2">🎯 Pattern Recognition (Premium):</h4>
+            <ul className="text-sm text-amber-800 space-y-2">
+              <li className="flex items-start space-x-2">
+                <span className="text-amber-600 mt-0.5">•</span>
+                <span>What similarities do you notice between tonight and previous evenings when you felt this way?</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-amber-600 mt-0.5">•</span>
+                <span>What coping strategies have worked best for you in similar situations?</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-amber-600 mt-0.5">•</span>
+                <span>How has your relationship with evening urges evolved since starting your journey?</span>
+              </li>
+            </ul>
+          </div>
+        ) : (
+          <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg relative">
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-lg">
+              <div className="text-center">
+                <div className="text-2xl mb-2">🔒</div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Pattern Recognition Prompts</p>
+                <p className="text-xs text-gray-500">Premium Feature</p>
+              </div>
+            </div>
+            <h4 className="font-medium text-gray-400 mb-2">🎯 Pattern Recognition:</h4>
+            <ul className="text-sm text-gray-400 space-y-2">
+              <li>Advanced prompts based on your history...</li>
+              <li>Personalized coping strategies...</li>
+              <li>Journey progress insights...</li>
+            </ul>
+          </div>
+        )}
 
         {/* Unmet needs exploration */}
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -1186,8 +1344,31 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
     console.log('Time for your evening toolkit follow-up reflection!');
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     saveCheckInData();
+    
+    // Record session for authenticated users
+    if (isAuthenticated && user && (user as any).uid) {
+      try {
+        // First increment the session count
+        await startSession((user as any).uid);
+        // Then save the check-in data
+        await saveCheckIn((user as any).uid, checkInData);
+      } catch (error) {
+        console.error('Error recording session:', error);
+      }
+    }
+    
+    // Show premium insights or complete
+    if (isAuthenticated) {
+      setShowPremiumInsights(true);
+    } else {
+      onComplete?.();
+    }
+  };
+
+  const handleInsightsClose = () => {
+    setShowPremiumInsights(false);
     onComplete?.();
   };
 
@@ -1656,30 +1837,79 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
           {renderStepContent()}
           
           {/* Back button for most steps */}
-          {currentStep !== 'welcome' && currentStep !== 'reflection' && currentStep !== 'insights' && currentStep !== 'breathing-exercise' && (
+          {currentStep !== 'welcome' && (
             <button
               onClick={() => {
-                // Special back logic for branching paths
-                if (currentStep === 'activity-selection' || currentStep === 'pause-options' || currentStep === 'eating-prompts') {
-                  setCurrentStep('routing');
-                } else if (currentStep === 'journaling' || currentStep === 'timer') {
-                  // Don't show back button for these steps
-                  return;
-                } else {
-                  const steps: CheckInStep[] = ['welcome', 'timing-check', 'feelings-check', 'hunger-fullness', 'routing'];
-                  const currentIndex = steps.indexOf(currentStep);
-                  if (currentIndex > 0) {
-                    setCurrentStep(steps[currentIndex - 1]);
-                  }
+                // Comprehensive back navigation logic
+                switch (currentStep) {
+                  case 'timing-check':
+                    setCurrentStep('welcome');
+                    break;
+                  case 'feelings-check':
+                    setCurrentStep('timing-check');
+                    break;
+                  case 'hunger-fullness':
+                    setCurrentStep('feelings-check');
+                    break;
+                  case 'routing':
+                    setCurrentStep('hunger-fullness');
+                    break;
+                  case 'activity-selection':
+                  case 'pause-options':
+                  case 'eating-prompts':
+                    setCurrentStep('routing');
+                    break;
+                  case 'journaling':
+                    // Go back to the route that led here
+                    if (checkInData.routeChosen === 'pause') {
+                      setCurrentStep('pause-options');
+                    } else {
+                      setCurrentStep('routing');
+                    }
+                    break;
+                  case 'timer':
+                    // Go back to activity selection
+                    setCurrentStep('activity-selection');
+                    break;
+                  case 'breathing-exercise':
+                    setCurrentStep('pause-options');
+                    break;
+                  case 'mindful-eating':
+                    setCurrentStep('eating-prompts');
+                    break;
+                  case 'reflection':
+                    // Go back based on the path taken
+                    if (checkInData.routeChosen === 'eat') {
+                      setCurrentStep('mindful-eating');
+                    } else if (checkInData.routeChosen === 'activity') {
+                      setCurrentStep('timer');
+                    } else {
+                      setCurrentStep('journaling');
+                    }
+                    break;
+                  case 'insights':
+                    setCurrentStep('reflection');
+                    break;
+                  default:
+                    // Fallback to routing for unknown steps
+                    setCurrentStep('routing');
                 }
               }}
-              className="mt-4 text-gray-500 hover:text-gray-700 text-sm"
+              className="mt-4 text-gray-500 hover:text-gray-700 text-sm underline hover:no-underline"
             >
               ← Back
             </button>
           )}
         </div>
       </div>
+
+      {/* Premium Insights Modal */}
+      {showPremiumInsights && (
+        <PremiumInsights
+          checkInData={checkInData}
+          onClose={handleInsightsClose}
+        />
+      )}
     </div>
   );
 }
