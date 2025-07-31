@@ -399,6 +399,18 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
           </button>
         ))}
       </div>
+
+      {/* Day Patterns Awareness */}
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <h4 className="font-semibold text-amber-800 mb-2">💡 Day Patterns Insight</h4>
+        <p className="text-sm text-amber-700">
+          <strong>Notice:</strong> Evening urges often stem from daytime patterns. If it's been 5+ hours or you're unsure, 
+          your body might be catching up from undereating earlier.
+        </p>
+        <div className="mt-2 text-xs text-amber-600">
+          Tomorrow's gentle reminder: Aim for nourishing meals every 3-4 hours with protein + fiber for steady energy.
+        </div>
+      </div>
     </div>
   );
 
@@ -1048,12 +1060,50 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
           id="feelings-context"
         />
       </div>
-      <p className="text-sm text-gray-600">Select all that apply:</p>
+      
+      {/* HALT Check Section */}
+      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+        <h4 className="font-semibold text-green-800 mb-2">🔍 HALT Check</h4>
+        <p className="text-sm text-green-700 mb-3">
+          Quick awareness check - Are you feeling any of these right now?
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { key: 'halt-hungry', label: 'Hungry', description: 'Physical hunger signals' },
+            { key: 'halt-angry', label: 'Angry', description: 'Frustration, irritation' },
+            { key: 'halt-lonely', label: 'Lonely', description: 'Need for connection' },
+            { key: 'halt-tired', label: 'Tired', description: 'Physical or emotional fatigue' }
+          ].map(item => (
+            <button
+              key={item.key}
+              onClick={() => {
+                setCheckInData(prev => ({
+                  ...prev,
+                  feelings: prev.feelings.includes(item.key)
+                    ? prev.feelings.filter(f => f !== item.key)
+                    : [...prev.feelings, item.key]
+                }));
+              }}
+              className={`p-2 rounded-lg border-2 transition-all text-left text-sm ${
+                checkInData.feelings.includes(item.key)
+                  ? 'border-green-500 bg-green-100'
+                  : 'border-green-200 hover:border-green-300 bg-white'
+              }`}
+            >
+              <div className="font-medium text-green-800">{item.label}</div>
+              <div className="text-xs text-green-600">{item.description}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-sm text-gray-600">What other emotions are present? Select all that apply:</p>
       
       <div className="grid grid-cols-2 gap-3">
         {[
-          'physically-hungry', 'tired', 'stressed', 'bored', 
-          'happy', 'lonely', 'sad', 'frustrated', 'irritated', 'satisfied'
+          'stressed', 'bored', 'anxious', 'sad', 
+          'happy', 'frustrated', 'irritated', 'satisfied',
+          'overwhelmed', 'restless', 'content', 'worried'
         ].map(feeling => (
           <button
             key={feeling}
@@ -1128,6 +1178,37 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
         </div>
       )}
 
+      {/* Unmet Needs Exploration */}
+      {checkInData.feelings.length > 0 && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="font-semibold text-blue-800 mb-2">💭 What might you need right now?</h4>
+          <p className="text-sm text-blue-700 mb-3">
+            Sometimes food becomes a way to meet emotional needs. What would truly nurture you?
+          </p>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {[
+              '🤗 Comfort & soothing',
+              '🎯 Something to do', 
+              '💕 Connection with others',
+              '😴 Rest & relaxation',
+              '🎉 Celebration & joy',
+              '⚡ Energy & stimulation',
+              '🛡️ Safety & security',
+              '🎨 Creative expression'
+            ].map(need => (
+              <div key={need} className="p-2 bg-blue-100 rounded text-blue-800 text-xs">
+                {need}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+            <p className="text-xs text-blue-700">
+              <strong>Gentle reminder:</strong> Notice if any of these resonate. We'll explore alternatives to meet these needs in the next steps.
+            </p>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={() => setCurrentStep('hunger-fullness')}
         disabled={checkInData.feelings.length === 0 && !checkInData.customFeeling}
@@ -1165,11 +1246,14 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
         
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800 mb-2">
-            <strong>Take a moment to check in with your body.</strong> Where do you fall on this scale right now?
+            <strong>🫁 Pause and breathe.</strong> Take a moment to check in with your body.
           </p>
           <p className="text-xs text-blue-700">
-            0 = Painfully hungry • 5 = Satisfied/neutral • 10 = Painfully full
+            Is this physical hunger or emotional? GLP-1 can make hunger signals quieter - tune into energy, mood, and satisfaction cues too.
           </p>
+          <div className="mt-2 text-xs text-blue-600">
+            0 = Painfully hungry • 5 = Satisfied/neutral • 10 = Painfully full
+          </div>
         </div>
 
         <div className="space-y-2">
