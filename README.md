@@ -1,16 +1,17 @@
-# Evening Toolkit - Standalone App
+# 🌙 GLP-1 Mindful Evenings
 
-A mindful companion for evening eating and emotional awareness, extracted from the GLP-1 Nutrition Sidekick app.
+A gentle, mindful companion for navigating evening emotions and eating habits with curiosity and self-compassion. Built with intuitive eating principles for GLP-1 medication users and anyone seeking a healthier relationship with evening eating.
 
-## About
+## 💫 About
 
-The Evening Toolkit helps you navigate evening urges to eat by:
+GLP-1 Mindful Evenings helps you navigate evening urges to eat by:
 
 - **Checking in** with your emotions and hunger levels
-- **Exploring alternatives** like nurturing activities or mindful eating
+- **Exploring alternatives** like nurturing activities or mindful eating  
 - **Building awareness** of patterns over time with self-compassion
+- **Addressing GLP-1 specific needs** like appetite changes and emotional triggers
 
-Rooted in intuitive eating principles, this tool focuses on curiosity rather than restriction.
+Rooted in intuitive eating principles by Evelyn Tribole & Elyse Resch, this tool focuses on curiosity and awareness rather than restriction.
 
 ## Features
 

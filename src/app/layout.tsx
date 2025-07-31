@@ -5,10 +5,10 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Evening Toolkit - Mindful Evening Check-ins',
-  description: 'A gentle tool to help you navigate evening emotions and eating with curiosity and self-compassion.',
-  keywords: 'mindful eating, evening toolkit, emotional eating, self-care, wellness',
-  authors: [{ name: 'Evening Toolkit Team' }],
+  title: 'GLP-1 Mindful Evenings - Gentle Evening Check-ins',
+  description: 'A gentle, mindful companion for navigating evening emotions and eating habits with GLP-1 medication users.',
+  keywords: 'GLP-1, mindful eating, evening toolkit, emotional eating, self-care, wellness, intuitive eating',
+  authors: [{ name: 'GLP-1 Mindful Evenings Team' }],
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',

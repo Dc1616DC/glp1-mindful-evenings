@@ -59,7 +59,7 @@ export default function Home() {
           <div className="space-y-4">
             <div className="text-8xl">🌙</div>
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Evening Toolkit
+              GLP-1 Mindful Evenings
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
               A gentle companion for navigating evening emotions and eating with curiosity and self-compassion.
