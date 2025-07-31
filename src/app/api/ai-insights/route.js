@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { errorLogger } from '../../../../lib/monitoring';
 
 const GROK_API_KEY = process.env.GROK_API_KEY;
 const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
@@ -157,6 +158,11 @@ Return ONLY a valid JSON array (no other text) with exactly 3 objects in this fo
     return NextResponse.json({ response: aiResponse });
   } catch (error) {
     console.error('Error getting AI insights:', error);
+    errorLogger.aiService(error, null, {
+      type: type || 'unknown',
+      hasApiKey: !!GROK_API_KEY,
+      operation: 'generate_insights'
+    });
     return NextResponse.json({ error: 'Failed to generate AI insights' }, { status: 500 });
   }
 }

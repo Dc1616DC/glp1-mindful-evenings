@@ -7,6 +7,7 @@ import PremiumBadge from './PremiumBadge';
 import { useAuth } from '../../contexts/AuthContext';
 import { saveCheckIn, startSession } from '../../lib/userService';
 import { getPersonalizedActivitySuggestions } from '../../lib/grokApi';
+import { analytics } from '../../lib/analytics';
 
 interface EveningToolkitProps {
   onComplete?: () => void;
@@ -278,6 +279,13 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
   const [showMorePrompts, setShowMorePrompts] = useState(false);
   
+  // Track check-in start
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      analytics.checkInStarted((user as any).uid);
+    }
+  }, [isAuthenticated, user]);
+
   // Reset breathing exercise state when leaving the breathing step
   useEffect(() => {
     if (currentStep !== 'breathing-exercise') {
@@ -746,6 +754,11 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
                   <button
                     key={`ai-${index}`}
                     onClick={() => {
+                      // Track AI suggestion selection
+                      if (isAuthenticated && user) {
+                        analytics.aiSuggestionSelected((user as any).uid, activity);
+                      }
+                      
                       setCheckInData(prev => ({ 
                         ...prev, 
                         selectedActivity: {
@@ -1350,12 +1363,19 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
     // Record session for authenticated users
     if (isAuthenticated && user && (user as any).uid) {
       try {
+        // Track completion analytics
+        analytics.checkInCompleted((user as any).uid, checkInData);
+        
         // First increment the session count
         await startSession((user as any).uid);
         // Then save the check-in data
         await saveCheckIn((user as any).uid, checkInData);
       } catch (error) {
         console.error('Error recording session:', error);
+        // Track error
+        analytics.error((user as any).uid, 'session_save_error', (error as Error).message, {
+          step: 'handleComplete'
+        });
       }
     }
     
@@ -1840,59 +1860,83 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
           {currentStep !== 'welcome' && (
             <button
               onClick={() => {
+                // Track back button usage
+                const fromStep = currentStep;
+                let toStep: CheckInStep;
+                
                 // Comprehensive back navigation logic
                 switch (currentStep) {
                   case 'timing-check':
+                    toStep = 'welcome';
                     setCurrentStep('welcome');
                     break;
                   case 'feelings-check':
+                    toStep = 'timing-check';
                     setCurrentStep('timing-check');
                     break;
                   case 'hunger-fullness':
+                    toStep = 'feelings-check';
                     setCurrentStep('feelings-check');
                     break;
                   case 'routing':
+                    toStep = 'hunger-fullness';
                     setCurrentStep('hunger-fullness');
                     break;
                   case 'activity-selection':
                   case 'pause-options':
                   case 'eating-prompts':
+                    toStep = 'routing';
                     setCurrentStep('routing');
                     break;
                   case 'journaling':
                     // Go back to the route that led here
                     if (checkInData.routeChosen === 'pause') {
+                      toStep = 'pause-options';
                       setCurrentStep('pause-options');
                     } else {
+                      toStep = 'routing';
                       setCurrentStep('routing');
                     }
                     break;
                   case 'timer':
                     // Go back to activity selection
+                    toStep = 'activity-selection';
                     setCurrentStep('activity-selection');
                     break;
                   case 'breathing-exercise':
+                    toStep = 'pause-options';
                     setCurrentStep('pause-options');
                     break;
                   case 'mindful-eating':
+                    toStep = 'eating-prompts';
                     setCurrentStep('eating-prompts');
                     break;
                   case 'reflection':
                     // Go back based on the path taken
                     if (checkInData.routeChosen === 'eat') {
+                      toStep = 'mindful-eating';
                       setCurrentStep('mindful-eating');
                     } else if (checkInData.routeChosen === 'activity') {
+                      toStep = 'timer';
                       setCurrentStep('timer');
                     } else {
+                      toStep = 'journaling';
                       setCurrentStep('journaling');
                     }
                     break;
                   case 'insights':
+                    toStep = 'reflection';
                     setCurrentStep('reflection');
                     break;
                   default:
                     // Fallback to routing for unknown steps
+                    toStep = 'routing';
                     setCurrentStep('routing');
+                }
+
+                // Track the back button usage
+                if (isAuthenticated && user) {
+                  analytics.backButtonUsed((user as any).uid, fromStep, toStep);
                 }
               }}
               className="mt-4 text-gray-500 hover:text-gray-700 text-sm underline hover:no-underline"

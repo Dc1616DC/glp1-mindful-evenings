@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:webhook": "node scripts/test-webhook.js",
+    "test:webhook:help": "node scripts/test-webhook.js --help",
+    "health-check": "node scripts/health-check.js",
+    "test:e2e": "echo 'See TESTING.md for comprehensive testing guide'"
   },
   "dependencies": {
     "@stripe/stripe-js": "^7.7.0",

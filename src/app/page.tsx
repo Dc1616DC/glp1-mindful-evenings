@@ -9,6 +9,7 @@ import SubscriptionManager from '../components/SubscriptionManager';
 import MedicalDisclaimer from '../components/MedicalDisclaimer';
 import { useAuth } from '../../contexts/AuthContext';
 import { canStartSession, startSession } from '../../lib/userService';
+import { analytics } from '../../lib/analytics';
 
 export default function Home() {
   const { user, userProfile, loading, isAuthenticated, isPremium } = useAuth();
@@ -106,6 +107,9 @@ export default function Home() {
     const { canStart, remainingSessions: remaining, error } = await canStartSession((user as any).uid);
     
     if (!canStart) {
+      // Track session limit reached
+      analytics.sessionLimitReached((user as any).uid, typeof remaining === 'number' ? remaining : 0);
+      
       // Show session limit modal
       setRemainingSessions(typeof remaining === 'number' ? remaining : 0);
       setShowSessionLimitModal(true);
@@ -125,6 +129,11 @@ export default function Home() {
 
   const handleUpgrade = async () => {
     try {
+      // Track upgrade click
+      if (user) {
+        analytics.upgradeClicked((user as any).uid, 'session_limit');
+      }
+      
       setShowSessionLimitModal(false);
       
       if (!user || !(user as any).email) {
