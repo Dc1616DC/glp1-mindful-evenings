@@ -28,13 +28,23 @@ export async function POST(req) {
       );
     }
 
-    console.log('Creating checkout session for:', { userId, userEmail, priceId });
+    const cleanPriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID?.trim();
+    
+    console.log('Creating checkout session for:', { userId, userEmail, cleanPriceId });
     console.log('Environment variables:', {
       hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
       appUrl: process.env.NEXT_PUBLIC_APP_URL,
       hasPriceId: !!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID
+      rawPriceId: JSON.stringify(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID),
+      cleanPriceId: JSON.stringify(cleanPriceId)
     });
+
+    if (!cleanPriceId) {
+      return NextResponse.json(
+        { error: 'Price ID not configured' },
+        { status: 500 }
+      );
+    }
 
     // Create or retrieve customer
     const customers = await stripe.customers.list({
@@ -60,7 +70,7 @@ export async function POST(req) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
+          price: cleanPriceId,
           quantity: 1,
         },
       ],
