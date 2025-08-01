@@ -7,9 +7,11 @@ const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
 export async function POST(req) {
   try {
     console.log('API key available:', !!GROK_API_KEY);
-    if (!GROK_API_KEY) {
+    if (!GROK_API_KEY || GROK_API_KEY.trim() === '') {
       console.error('Grok API key not configured');
-      return NextResponse.json({ error: 'AI service not configured' }, { status: 500 });
+      return NextResponse.json({ 
+        response: 'AI insights are temporarily unavailable. Your check-in has been saved successfully!' 
+      });
     }
 
     const { checkInData, userHistory = [], type = 'insights' } = await req.json();
@@ -163,6 +165,9 @@ Return ONLY a valid JSON array (no other text) with exactly 3 objects in this fo
       hasApiKey: !!GROK_API_KEY,
       operation: 'generate_insights'
     });
-    return NextResponse.json({ error: 'Failed to generate AI insights' }, { status: 500 });
+    // Return graceful fallback instead of 500 error
+    return NextResponse.json({ 
+      response: 'AI insights are temporarily unavailable. Your check-in has been saved successfully!' 
+    });
   }
 }
