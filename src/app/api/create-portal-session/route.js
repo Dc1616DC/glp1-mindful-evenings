@@ -20,7 +20,7 @@ export async function POST(req) {
     // Create portal session for customer to manage their subscription
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/`,
+      return_url: 'https://evening-toolkit-standalone.vercel.app/',
     });
 
     return NextResponse.json({ url: session.url });
