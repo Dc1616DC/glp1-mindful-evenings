@@ -311,6 +311,66 @@ export default function Home() {
             </div>
           )}
 
+          {/* Premium Upgrade Section */}
+          {isAuthenticated && !isPremium && (
+            <div className="mt-12 max-w-2xl mx-auto">
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+                <div className="text-center space-y-4">
+                  <h2 className="text-3xl font-bold">✨ Upgrade to Premium</h2>
+                  <p className="text-lg opacity-90">
+                    Unlock unlimited access and personalized insights for just $2.99/month
+                  </p>
+                  
+                  <div className="grid md:grid-cols-2 gap-4 text-left mt-6 mb-8">
+                    <div className="space-y-2">
+                      <div className="flex items-start space-x-2">
+                        <span className="text-xl">🌟</span>
+                        <div>
+                          <p className="font-semibold">Unlimited Check-ins</p>
+                          <p className="text-sm opacity-80">No more weekly limits</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <span className="text-xl">🤖</span>
+                        <div>
+                          <p className="font-semibold">AI-Powered Insights</p>
+                          <p className="text-sm opacity-80">Personalized patterns & guidance</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-start space-x-2">
+                        <span className="text-xl">📊</span>
+                        <div>
+                          <p className="font-semibold">Advanced Analytics</p>
+                          <p className="text-sm opacity-80">Deep understanding of your habits</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <span className="text-xl">💪</span>
+                        <div>
+                          <p className="font-semibold">Priority Support</p>
+                          <p className="text-sm opacity-80">Get help when you need it</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={handleUpgrade}
+                    className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all shadow-lg"
+                  >
+                    Start Premium Access
+                  </button>
+                  
+                  <p className="text-sm opacity-75">
+                    Cancel anytime • Secure payment via Stripe
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
           <div className="mt-16 text-center text-gray-600 space-y-2">
             <p className="text-sm">
