@@ -14,7 +14,9 @@ export async function POST(req) {
     // Dynamically import Stripe to avoid build-time initialization
     const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2024-06-20',
+      maxNetworkRetries: 0, // Disable retries to get faster error responses
+      timeout: 20000, // 20 second timeout
     });
 
     const { userId, userEmail, priceId } = await req.json();
