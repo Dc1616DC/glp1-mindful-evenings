@@ -297,6 +297,21 @@ export default function Home() {
                   <div className="space-x-4">
                     <button
                       onClick={async () => {
+                        // Debug user profile
+                        const response = await fetch('/api/debug-user', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ userId: (user as any).uid })
+                        });
+                        const data = await response.json();
+                        alert('User Profile Debug:\n' + JSON.stringify(data, null, 2));
+                      }}
+                      className="text-sm text-green-500 hover:text-green-700 underline"
+                    >
+                      Debug Profile
+                    </button>
+                    <button
+                      onClick={async () => {
                         // Force refresh user profile
                         window.location.reload();
                       }}
