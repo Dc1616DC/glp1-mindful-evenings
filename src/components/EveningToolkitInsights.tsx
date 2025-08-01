@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { getCheckInHistory } from '../../lib/userService';
 
 interface CheckInData {
   physicalHunger: number;
@@ -23,22 +25,57 @@ interface PatternInsight {
 }
 
 export default function EveningToolkitInsights() {
+  const { user, isAuthenticated } = useAuth();
   const [history, setHistory] = useState<CheckInData[]>([]);
   const [insights, setInsights] = useState<PatternInsight[]>([]);
   const [showDetails, setShowDetails] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadHistory = () => {
-      const historyData = JSON.parse(localStorage.getItem('eveningToolkitHistory') || '[]');
-      setHistory(historyData);
-      
-      if (historyData.length >= 3) {
-        generateInsights(historyData);
+    const loadHistory = async () => {
+      if (!isAuthenticated || !user) {
+        // Fallback to localStorage for non-authenticated users
+        const historyData = JSON.parse(localStorage.getItem('eveningToolkitHistory') || '[]');
+        setHistory(historyData);
+        if (historyData.length >= 3) {
+          generateInsights(historyData);
+        }
+        setLoading(false);
+        return;
       }
+
+      try {
+        // Load from Firebase for authenticated users
+        const { data, error } = await getCheckInHistory((user as any).uid, 50); // Get last 50 check-ins
+        if (data && !error) {
+          // Transform Firebase data to match expected format
+          const transformedData = data.map((item: any) => ({
+            physicalHunger: item.hungerFullnessLevel || 0,
+            emotions: item.feelings || [],
+            triggers: [], // Could extract from custom feelings
+            selectedActivity: item.selectedActivity,
+            reflectionNotes: item.reflectionNotes,
+            timestamp: item.createdAt || item.timestamp?.toDate?.()?.toISOString() || new Date().toISOString()
+          }));
+          setHistory(transformedData);
+          if (transformedData.length >= 3) {
+            generateInsights(transformedData);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading check-in history:', error);
+        // Fallback to localStorage on error
+        const historyData = JSON.parse(localStorage.getItem('eveningToolkitHistory') || '[]');
+        setHistory(historyData);
+        if (historyData.length >= 3) {
+          generateInsights(historyData);
+        }
+      }
+      setLoading(false);
     };
 
     loadHistory();
-  }, []);
+  }, [isAuthenticated, user]);
 
   const generateInsights = (data: CheckInData[]) => {
     const newInsights: PatternInsight[] = [];
@@ -175,6 +212,19 @@ export default function EveningToolkitInsights() {
   };
 
   const streakInfo = getStreakInfo();
+
+  if (loading) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 animate-pulse">
+        <div className="h-4 bg-gray-300 rounded mb-2"></div>
+        <div className="h-3 bg-gray-200 rounded mb-4"></div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-8 bg-gray-300 rounded"></div>
+          <div className="h-8 bg-gray-300 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (history.length < 3) {
     return (

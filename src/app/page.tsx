@@ -18,7 +18,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showSessionLimitModal, setShowSessionLimitModal] = useState(false);
   const [showMedicalDisclaimer, setShowMedicalDisclaimer] = useState(false);
-  const [remainingSessions, setRemainingSessions] = useState(0);
+  const [remainingSessions, setRemainingSessions] = useState(3);
 
   // Handle Stripe redirect
   useEffect(() => {
@@ -68,9 +68,10 @@ export default function Home() {
     const lastShown = localStorage.getItem('eveningToolkitLastShown');
     const today = new Date().toDateString();
     
-    if (isEveningTime && lastShown !== today) {
-      setTimeout(() => setShowEveningToolkit(true), 1000);
-    }
+    // Disabled auto-opening - users should manually start check-ins
+    // if (isEveningTime && lastShown !== today) {
+    //   setTimeout(() => setShowEveningToolkit(true), 1000);
+    // }
   }, []);
 
   const clearAllData = () => {
@@ -169,16 +170,27 @@ export default function Home() {
     }
   };
 
+  // Function to refresh session count
+  const refreshSessionCount = async () => {
+    if (user && (user as any).uid && !isPremium) {
+      const { remainingSessions } = await canStartSession((user as any).uid);
+      if (typeof remainingSessions === 'number') {
+        setRemainingSessions(remainingSessions);
+      }
+    }
+  };
+
   // Update remaining sessions when user profile changes
   useEffect(() => {
-    if (user && userProfile && !isPremium && (user as any).uid) {
-      canStartSession((user as any).uid).then(({ remainingSessions }) => {
-        if (typeof remainingSessions === 'number') {
-          setRemainingSessions(remainingSessions);
-        }
-      });
-    }
+    refreshSessionCount();
   }, [user, userProfile, isPremium]);
+
+  // Reset session count when user logs out
+  useEffect(() => {
+    if (!user) {
+      setRemainingSessions(3);
+    }
+  }, [user]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100">
@@ -275,6 +287,9 @@ export default function Home() {
                     <p className="text-sm text-gray-600">
                       Welcome back, {(user as any)?.displayName || 'there'}!
                     </p>
+                    <p className="text-xs text-gray-400">
+                      {(user as any)?.email}
+                    </p>
                     <p className="text-xs text-gray-500">
                       {isPremium ? '✨ Premium Member' : `${remainingSessions} free sessions remaining`}
                     </p>
@@ -321,6 +336,8 @@ export default function Home() {
           onComplete={() => {
             setShowEveningToolkit(false);
             localStorage.setItem('eveningToolkitLastShown', new Date().toDateString());
+            // Refresh session count after completion
+            refreshSessionCount();
           }}
           onSkip={() => {
             setShowEveningToolkit(false);

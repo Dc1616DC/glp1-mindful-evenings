@@ -489,7 +489,11 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
         {/* Smart suggestion banner */}
         <div className="p-3 bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200 rounded-lg">
           <p className="text-sm text-purple-800 text-center">
-            💡 <strong>Gentle guidance:</strong> Based on your feelings, consider exploring alternatives first - they often meet the need more directly than food.
+            {isPhysicallyHungry ? (
+              <>💡 <strong>Gentle guidance:</strong> It sounds like your body is genuinely hungry. Consider honoring that hunger with mindful nourishment, or explore what else might support you right now.</>
+            ) : (
+              <>💡 <strong>Gentle guidance:</strong> Based on your feelings, consider exploring alternatives first - they often meet the need more directly than food.</>
+            )}
           </p>
         </div>
 
