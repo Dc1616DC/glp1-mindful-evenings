@@ -2,10 +2,19 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
+    // Verify Stripe key exists
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Payment system not configured' },
+        { status: 500 }
+      );
+    }
+
     // Dynamically import Stripe to avoid build-time initialization
     const Stripe = (await import('stripe')).default;
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-      apiVersion: '2023-10-16',
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-11-20.acacia',
     });
 
     const { userId, userEmail, priceId } = await req.json();
@@ -46,8 +55,8 @@ export async function POST(req) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://evening-toolkit-standalone.vercel.app'}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://evening-toolkit-standalone.vercel.app'}/?canceled=true`,
       metadata: {
         firebaseUserId: userId,
       },
@@ -55,9 +64,31 @@ export async function POST(req) {
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error('Error creating checkout session:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      statusCode: error.statusCode,
+      raw: error.raw
+    });
+    
+    // Handle specific Stripe errors
+    if (error.type === 'StripeConnectionError') {
+      return NextResponse.json(
+        { error: 'Unable to connect to payment processor. Please try again.' },
+        { status: 503 }
+      );
+    }
+    
+    if (error.type === 'StripeAuthenticationError') {
+      return NextResponse.json(
+        { error: 'Payment configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: error.message },
+      { error: error.message || 'An unexpected error occurred' },
       { status: 500 }
     );
   }
