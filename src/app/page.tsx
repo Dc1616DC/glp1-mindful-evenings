@@ -294,15 +294,26 @@ export default function Home() {
                       {isPremium ? '✨ Premium Member' : `${remainingSessions} free sessions remaining`}
                     </p>
                   </div>
-                  <button
-                    onClick={async () => {
-                      const { signOut } = await import('../../lib/auth');
-                      await signOut();
-                    }}
-                    className="text-sm text-gray-500 hover:text-gray-700 underline"
-                  >
-                    Sign out
-                  </button>
+                  <div className="space-x-4">
+                    <button
+                      onClick={async () => {
+                        // Force refresh user profile
+                        window.location.reload();
+                      }}
+                      className="text-sm text-blue-500 hover:text-blue-700 underline"
+                    >
+                      Refresh Status
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const { signOut } = await import('../../lib/auth');
+                        await signOut();
+                      }}
+                      className="text-sm text-gray-500 hover:text-gray-700 underline"
+                    >
+                      Sign out
+                    </button>
+                  </div>
                 </div>
               </div>
               
