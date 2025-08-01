@@ -28,6 +28,14 @@ export async function POST(req) {
       );
     }
 
+    console.log('Creating checkout session for:', { userId, userEmail, priceId });
+    console.log('Environment variables:', {
+      hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+      appUrl: process.env.NEXT_PUBLIC_APP_URL,
+      hasPriceId: !!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID
+    });
+
     // Create or retrieve customer
     const customers = await stripe.customers.list({
       email: userEmail,
@@ -57,8 +65,8 @@ export async function POST(req) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://evening-toolkit-standalone.vercel.app'}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://evening-toolkit-standalone.vercel.app'}/?canceled=true`,
+      success_url: `https://evening-toolkit-standalone.vercel.app/?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://evening-toolkit-standalone.vercel.app/?canceled=true`,
       metadata: {
         firebaseUserId: userId,
       },
