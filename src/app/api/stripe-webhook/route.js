@@ -55,15 +55,20 @@ export async function POST(req) {
         }
 
         // Update user's subscription status in Firebase
-        await updateSubscription(userId, {
+        console.log(`Attempting to update subscription for user ${userId}`);
+        const updateResult = await updateSubscription(userId, {
           status: 'active',
           tier: 'premium',
           customerId: customerId,
           subscriptionId: subscriptionId,
           updatedAt: new Date().toISOString(),
         });
-
-        console.log(`✅ Subscription activated for user ${userId}`);
+        
+        if (updateResult.error) {
+          console.error(`❌ Failed to update subscription for user ${userId}:`, updateResult.error);
+        } else {
+          console.log(`✅ Subscription activated for user ${userId}`);
+        }
         break;
       }
 
