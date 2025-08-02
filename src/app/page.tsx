@@ -398,20 +398,30 @@ export default function Home() {
           )}
 
           {/* Footer */}
-          <div className="mt-16 text-center text-gray-600 space-y-2">
+          <div className="mt-16 text-center text-gray-600 space-y-4">
             <p className="text-sm">
               Rooted in intuitive eating principles • Built with self-compassion in mind
             </p>
-            <div className="text-xs">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs">
               <button
                 onClick={() => setShowMedicalDisclaimer(true)}
                 className="underline hover:text-gray-800"
               >
                 Medical Disclaimer
               </button>
-              <span className="mx-2">•</span>
-              <span>Not medical advice - consult your healthcare provider</span>
+              <a href="/terms" className="underline hover:text-gray-800">
+                Terms of Service
+              </a>
+              <a href="/privacy" className="underline hover:text-gray-800">
+                Privacy Policy
+              </a>
             </div>
+            <p className="text-xs text-gray-500">
+              Not medical advice - consult your healthcare provider
+            </p>
+            <p className="text-xs text-gray-500">
+              Questions? Email: support@glp1mindfulevenings.com
+            </p>
           </div>
         </div>
       </div>

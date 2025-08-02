@@ -1431,8 +1431,8 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
               }}
               className={`p-2 rounded-lg border-2 transition-all text-left text-sm ${
                 checkInData.feelings.includes(item.key)
-                  ? 'border-green-500 bg-green-100'
-                  : 'border-green-200 hover:border-green-300 bg-white'
+                  ? 'border-green-600 bg-green-100 shadow-sm'
+                  : 'border-gray-300 hover:border-gray-400 bg-white'
               }`}
             >
               <div className="font-medium text-green-800">{item.label}</div>
@@ -1462,8 +1462,8 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
             }}
             className={`p-3 rounded-lg border-2 transition-all capitalize text-left ${
               checkInData.feelings.includes(feeling)
-                ? 'border-purple-500 bg-purple-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-purple-500 bg-purple-100 text-purple-900 font-medium'
+                : 'border-gray-300 hover:border-gray-400 bg-white text-gray-800'
             }`}
           >
             {feeling.replace('-', ' ')}
