@@ -420,7 +420,7 @@ export default function Home() {
               Not medical advice - consult your healthcare provider
             </p>
             <p className="text-xs text-gray-500">
-              Questions? Email: support@glp1mindfulevenings.com
+              Questions? Email: Dan@chase-wellness.com
             </p>
           </div>
         </div>

@@ -106,7 +106,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Contact Us</h2>
               <p>For privacy-related questions or to exercise your data rights:</p>
-              <p className="font-medium mt-2">Email: support@glp1mindfulevenings.com</p>
+              <p className="font-medium mt-2">Email: Dan@chase-wellness.com</p>
               <p className="mt-2">Response time: Within 72 hours</p>
             </section>
           </div>

@@ -97,7 +97,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Contact Information</h2>
               <p>For questions about these Terms of Service, please contact us at:</p>
-              <p className="font-medium mt-2">support@glp1mindfulevenings.com</p>
+              <p className="font-medium mt-2">Dan@chase-wellness.com</p>
             </section>
           </div>
 

@@ -23,7 +23,7 @@ REFUND POLICY:
 - 7-day money-back guarantee for first-time subscribers
 - Refunds processed within 5-7 business days
 - No refunds after 7 days of subscription activation
-- Contact support@glp1mindfulevenings.com for refund requests
+- Contact Dan@chase-wellness.com for refund requests
 ```
 
 **Pros:**
