@@ -194,15 +194,15 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 sm:py-12">
         <div className="text-center space-y-8">
           {/* Header */}
           <div className="space-y-4">
             <div className="text-8xl">🌙</div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               GLP-1 Mindful Evenings
             </h1>
-            <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
               A gentle companion for navigating evening emotions and eating with curiosity and self-compassion.
             </p>
           </div>
@@ -212,7 +212,7 @@ export default function Home() {
             <button
               onClick={handleStartCheckIn}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 font-medium text-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-4 sm:px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 font-medium text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               🌟 Start Evening Check-in
               {!isAuthenticated && <span className="block text-sm mt-1">Sign in to track your progress</span>}
@@ -234,14 +234,14 @@ export default function Home() {
                     alert('No check-ins yet. Start your first one!');
                   }
                 }}
-                className="bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 font-medium transition-all"
+                className="bg-blue-500 text-white py-3 px-3 sm:px-4 rounded-lg hover:bg-blue-600 font-medium text-sm sm:text-base transition-all"
               >
                 📊 View History
               </button>
 
               <button
                 onClick={clearAllData}
-                className="bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 font-medium transition-all"
+                className="bg-gray-500 text-white py-3 px-3 sm:px-4 rounded-lg hover:bg-gray-600 font-medium text-sm sm:text-base transition-all"
               >
                 🗑️ Clear Data
               </button>
@@ -250,27 +250,27 @@ export default function Home() {
 
           {/* About Section */}
           <div className="max-w-3xl mx-auto mt-12">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">How it works</h2>
-              <div className="grid md:grid-cols-3 gap-6 text-left">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-lg">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">How it works</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-left">
                 <div className="space-y-3">
                   <div className="text-3xl">🤔</div>
                   <h3 className="font-semibold text-gray-900">Check In</h3>
-                  <p className="text-gray-700 text-sm">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     Explore your current feelings, hunger levels, and what might be driving your evening urges.
                   </p>
                 </div>
                 <div className="space-y-3">
                   <div className="text-3xl">🌸</div>
                   <h3 className="font-semibold text-gray-900">Explore Options</h3>
-                  <p className="text-gray-700 text-sm">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     Choose from mindful eating, nurturing activities, or gentle reflection based on what you need.
                   </p>
                 </div>
                 <div className="space-y-3">
                   <div className="text-3xl">📈</div>
                   <h3 className="font-semibold text-gray-900">Build Awareness</h3>
-                  <p className="text-gray-700 text-sm">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     Track patterns over time to understand your evening habits with compassion and insight.
                   </p>
                 </div>
@@ -282,7 +282,7 @@ export default function Home() {
           {isAuthenticated && (
             <div className="space-y-4 max-w-md mx-auto">
               <div className="mt-8 p-4 bg-white/50 backdrop-blur-sm rounded-xl">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                   <div className="text-left">
                     <p className="text-sm text-gray-600">
                       Welcome back, {(user as any)?.displayName || 'there'}!
@@ -294,7 +294,7 @@ export default function Home() {
                       {isPremium ? '✨ Premium Member' : `${remainingSessions} free sessions remaining`}
                     </p>
                   </div>
-                  <div className="space-x-4">
+                  <div className="flex flex-wrap gap-2 sm:gap-4">
                     <button
                       onClick={async () => {
                         // Debug user profile
@@ -306,7 +306,7 @@ export default function Home() {
                         const data = await response.json();
                         alert('User Profile Debug:\n' + JSON.stringify(data, null, 2));
                       }}
-                      className="text-sm text-green-500 hover:text-green-700 underline"
+                      className="text-xs sm:text-sm text-green-500 hover:text-green-700 underline"
                     >
                       Debug Profile
                     </button>
@@ -315,7 +315,7 @@ export default function Home() {
                         // Force refresh user profile
                         window.location.reload();
                       }}
-                      className="text-sm text-blue-500 hover:text-blue-700 underline"
+                      className="text-xs sm:text-sm text-blue-500 hover:text-blue-700 underline"
                     >
                       Refresh Status
                     </button>
@@ -324,7 +324,7 @@ export default function Home() {
                         const { signOut } = await import('../../lib/auth');
                         await signOut();
                       }}
-                      className="text-sm text-gray-500 hover:text-gray-700 underline"
+                      className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 underline"
                     >
                       Sign out
                     </button>
@@ -339,15 +339,15 @@ export default function Home() {
 
           {/* Premium Upgrade Section */}
           {isAuthenticated && !isPremium && (
-            <div className="mt-12 max-w-2xl mx-auto">
-              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white shadow-xl">
+            <div className="mt-8 sm:mt-12 max-w-2xl mx-auto">
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl">
                 <div className="text-center space-y-4">
-                  <h2 className="text-3xl font-bold">✨ Upgrade to Premium</h2>
-                  <p className="text-lg opacity-90">
+                  <h2 className="text-2xl sm:text-3xl font-bold">✨ Upgrade to Premium</h2>
+                  <p className="text-base sm:text-lg opacity-90">
                     Unlock unlimited access and personalized insights for just $2.99/month
                   </p>
                   
-                  <div className="grid md:grid-cols-2 gap-4 text-left mt-6 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mt-6 mb-8">
                     <div className="space-y-2">
                       <div className="flex items-start space-x-2">
                         <span className="text-xl">🌟</span>
@@ -384,12 +384,12 @@ export default function Home() {
                   
                   <button
                     onClick={handleUpgrade}
-                    className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all shadow-lg"
+                    className="bg-white text-purple-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-gray-100 transform hover:scale-105 transition-all shadow-lg"
                   >
                     Start Premium Access
                   </button>
                   
-                  <p className="text-sm opacity-75">
+                  <p className="text-xs sm:text-sm opacity-75">
                     Cancel anytime • Secure payment via Stripe
                   </p>
                 </div>

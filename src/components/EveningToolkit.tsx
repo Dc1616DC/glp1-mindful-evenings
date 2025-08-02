@@ -1764,10 +1764,10 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
     switch (currentStep) {
       case 'welcome':
         return (
-          <div className="text-center space-y-6 max-h-[70vh] overflow-y-auto">
+          <div className="text-center space-y-4 sm:space-y-6 max-h-[65vh] sm:max-h-[70vh] overflow-y-auto">
             <div className="text-6xl mb-4">🌙</div>
-            <h2 className="text-2xl font-bold text-gray-900">Welcome to Your Evening Toolkit</h2>
-            <div className="text-left max-w-lg mx-auto space-y-4 text-gray-700 leading-relaxed">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Welcome to Your Evening Toolkit</h2>
+            <div className="text-left max-w-lg mx-auto space-y-3 sm:space-y-4 text-gray-700 text-sm sm:text-base leading-relaxed">
               <p>
                 Hey there! If you've ever found yourself reaching for snacks in the evening—not out of true physical hunger, 
                 but maybe to unwind from a long day, soothe some stress, or just out of habit—this gentle feature is here for you.
@@ -1837,9 +1837,9 @@ export default function EveningToolkit({ onComplete, onSkip }: EveningToolkitPro
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 bg-opacity-80 flex items-center justify-center p-4 z-50">
-      <div className="bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-blue-200">
-        <div className="p-6">
+    <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 bg-opacity-80 flex items-center justify-center p-3 sm:p-4 z-50">
+      <div className="bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-2xl max-w-md w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto border border-blue-200">
+        <div className="p-4 sm:p-6">
           {/* Progress indicator */}
           <div className="mb-6">
             <div className="flex justify-between text-xs text-gray-500 mb-2">
